@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["@chakra-ui/react", "@chakra-ui/icons"],
     "target": "es5",
     "lib": [
       "dom",

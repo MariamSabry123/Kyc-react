@@ -1,25 +1,29 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Flex } from '@chakra-ui/react';
+import Header from './components/Header';// Assuming you have a Header component defined
+
+import LoginPage from './pages/LoginPage';
+import HomePage from './pages/HomePage';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import DetailsPage from './pages/DetailsPage';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    // <Flex direction="column" minHeight="100vh">
+    //   <Header />
+
+      
+    //     <HomePage />
+    //   </Flex>
+
+<Router>
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/details/:id" element={<DetailsPage />} />
+        {/* Add more routes as needed */}
+      </Routes>
+      </Router>
   );
 }
 
