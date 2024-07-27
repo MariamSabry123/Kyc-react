@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
-import { Box, Button, Center, Flex, Image, Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import {
+  Box, Button, Center, Flex, Image, Input, Table, Tbody, Td, Th, Thead, Tr, Text, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton
+} from '@chakra-ui/react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
@@ -25,6 +27,10 @@ const DetailsPage: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reason, setReason] = useState<string>('');
+  const [actionType, setActionType] = useState<'Accepted' | 'Rejected' | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -47,30 +53,29 @@ const DetailsPage: React.FC = () => {
     fetchUser();
   }, [id]);
 
-  const handleAccept = async () => {
-    try {
-      const response = await axios.put('https://super-app-backend-production.up.railway.app/users/updateStatus', {
-        userId: user?._id,
-        newStatus: 'Accepted',
-      });
-      console.log(response.data.message); // Log the success message from the API
-      // Optionally, you can update the user state or perform any necessary actions upon success
-    } catch (error) {
-      console.error('Error accepting user:', error);
-      // Handle error states here
-    }
+  const handleAction = (type: 'Accepted' | 'Rejected') => {
+    setActionType(type);
+    onOpen();
   };
 
-  const handleReject = async () => {
+  const handleSubmit = async () => {
+    if (!reason) {
+      setValidationError('Reason is required');
+      return;
+    }
+    setValidationError(null);
+
     try {
       const response = await axios.put('https://super-app-backend-production.up.railway.app/users/updateStatus', {
         userId: user?._id,
-        newStatus: 'Rejected',
+        newStatus: actionType,
+        reasonOfRejection: reason,
       });
       console.log(response.data.message); // Log the success message from the API
       // Optionally, you can update the user state or perform any necessary actions upon success
+      onClose();
     } catch (error) {
-      console.error('Error rejecting user:', error);
+      console.error(`Error ${actionType?.toLowerCase()} user:`, error);
       // Handle error states here
     }
   };
@@ -156,13 +161,13 @@ const DetailsPage: React.FC = () => {
       </Box>
 
       {/* Actions */}
-      <Flex justifyContent="center" mt={20} mb={20}>
+      <Flex justifyContent="center" mt={4} mb={20}>
         <Button
           width='150px'
           bg="#52b788"
           color="white"
           mr={10}
-          onClick={handleAccept} // Call handleAccept function on button click
+          onClick={() => handleAction('Accepted')} // Call handleAction function with 'Accepted'
         >
           Accept 
         </Button>
@@ -170,11 +175,34 @@ const DetailsPage: React.FC = () => {
           width='150px'
           bg="#d90429"
           color='white'
-          onClick={handleReject} // Call handleReject function on button click
+          onClick={() => handleAction('Rejected')} // Call handleAction function with 'Rejected'
         >
           Reject 
         </Button>
       </Flex>
+
+      {/* Modal */}
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Reason for {actionType}</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Input 
+              placeholder="Enter reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+            />
+            {validationError && <Text color="red.500" mt={2}>{validationError}</Text>}
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
+              OK
+            </Button>
+            <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };

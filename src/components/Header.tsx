@@ -23,7 +23,7 @@ const Header: React.FC = () => {
       boxShadow="md"
     >
       <Box>
-        <Image src="momknspace green.png" alt="Logo" boxSize="50px" width="100px" />
+        <Image src="/momknspace green.png" alt="Logo" boxSize="50px" width="100px" />
       </Box>
       <Box>
         <Button width="100px" bg="#ff9f1c" color="white" _hover={{ bg: '#EA5A38' }} mr={2} onClick={handleSignOut}>
