@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Box, Button, Flex, Input, InputGroup, InputLeftElement, Table, Tbody, Td, Th, Thead, Tr, Text } from '@chakra-ui/react';
+import {
+  Box, Button, Flex, Input, InputGroup, InputLeftElement, Table, Tbody, Td, Th, Thead, Tr, Text, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Textarea, useDisclosure,
+} from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { SearchIcon } from '@chakra-ui/icons';
 import Header from '../components/Header';
-
 
 interface User {
   _id: string;
@@ -24,6 +25,10 @@ const HomePage: React.FC = () => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [data, setData] = useState<User[]>([]);
+  const [modalUserId, setModalUserId] = useState<string | null>(null);
+  const [modalAction, setModalAction] = useState<string>('');
+  const [reason, setReason] = useState<string>('');
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const itemsPerPage = 7;
 
   useEffect(() => {
@@ -64,33 +69,28 @@ const HomePage: React.FC = () => {
     navigate(`/details/${id}`);
   };
 
-  const handleAccept = async (userId: string) => {
-    try {
-      const response = await axios.put('https://super-app-backend-production.up.railway.app/users/updateStatus', {
-        userId: userId,
-        newStatus: 'Accepted'
-      });
-      console.log(response.data); // Handle success message
-      // Optionally, you can fetch data again after successful update to reflect changes
-      fetchData();
-    } catch (error) {
-      console.error('Error accepting user:', error);
-      // Handle error message
-    }
+  const openModal = (userId: string, action: string) => {
+    setModalUserId(userId);
+    setModalAction(action);
+    setReason('');
+    onOpen();
   };
 
-  const handleReject = async (userId: string) => {
-    try {
-      const response = await axios.put('https://super-app-backend-production.up.railway.app/users/updateStatus', {
-        userId: userId,
-        newStatus: 'Rejected'
-      });
-      console.log(response.data); // Handle success message
-      // Optionally, you can fetch data again after successful update to reflect changes
-      fetchData();
-    } catch (error) {
-      console.error('Error rejecting user:', error);
-      // Handle error message
+  const handleModalConfirm = async () => {
+    if (modalUserId && modalAction) {
+      const status = modalAction === 'accept' ? 'Accepted' : 'Rejected';
+      try {
+        const response = await axios.put('https://super-app-backend-production.up.railway.app/users/updateStatus', {
+          userId: modalUserId,
+          newStatus: status,
+          reasonOfRejection: reason,
+        });
+        console.log(response.data); // Handle success message
+        fetchData();
+      } catch (error) {
+        console.error(`Error ${modalAction === 'accept' ? 'accepting' : 'rejecting'} user:`, error);
+      }
+      onClose();
     }
   };
 
@@ -163,7 +163,7 @@ const HomePage: React.FC = () => {
                       color="green"
                       _hover={{ bg: '#fbb394' }}
                       mr={1}
-                      onClick={() => handleAccept(d._id)}
+                      onClick={() => openModal(d._id, 'accept')}
                     >
                       Accept
                     </Button>
@@ -172,7 +172,7 @@ const HomePage: React.FC = () => {
                       bg="#ffccd5"
                       color="red"
                       _hover={{ bg: '#fbb394' }}
-                      onClick={() => handleReject(d._id)}
+                      onClick={() => openModal(d._id, 'reject')}
                     >
                       Reject
                     </Button>
@@ -187,7 +187,7 @@ const HomePage: React.FC = () => {
         <div className='divider'></div>
 
         {/* Pagination */}
-        <Flex  justifyContent="space-between" alignItems="center" mt={4}>
+        <Flex justifyContent="space-between" alignItems="center" mt={4}>
           <Text color='gray'>{`Showing ${(currentPage - 1) * itemsPerPage + 1}-${
             currentPage * itemsPerPage > filteredData.length
               ? filteredData.length
@@ -223,11 +223,30 @@ const HomePage: React.FC = () => {
             </Button>
           </Flex>
         </Flex>
-       
       </Box>
-    
+
+      {/* Modal for accepting/rejecting with reason */}
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>{modalAction === 'accept' ? 'Accept User' : 'Reject User'}</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Textarea
+              placeholder="Enter reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="orange" mr={3} onClick={handleModalConfirm}>
+              Confirm
+            </Button>
+            <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
-    
   );
 };
 

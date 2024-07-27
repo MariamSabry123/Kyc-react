@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import {
-  Box, Button, Center, Flex, Image, Input, Table, Tbody, Td, Th, Thead, Tr, Text, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton
+  Box, Button, Center, Flex, Image, Input, Table, Tbody, Td, Th, Thead, Tr, Text, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton,
+  Textarea
 } from '@chakra-ui/react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -188,7 +189,7 @@ const DetailsPage: React.FC = () => {
           <ModalHeader>Reason for {actionType}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Input 
+            <Textarea 
               placeholder="Enter reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
