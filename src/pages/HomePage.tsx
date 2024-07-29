@@ -16,6 +16,7 @@ interface User {
     image: string;
   };
   userEmail: string;
+  createdAt?: string;
 }
 
 const HomePage: React.FC = () => {
@@ -134,6 +135,8 @@ const HomePage: React.FC = () => {
               <Th>First Name</Th>
               <Th>Last Name</Th>
               <Th>Email</Th>
+              <Th>Date of Submission</Th>
+              <Th>Has Date of Submission</Th> {/* New column */}
               <Th>Actions</Th>
             </Tr>
           </Thead>
@@ -145,6 +148,8 @@ const HomePage: React.FC = () => {
                 <Td>{d.userNationalID.firstName}</Td>
                 <Td>{d.userNationalID.lastName}</Td>
                 <Td>{d.userEmail}</Td>
+                <Td>{d.createdAt ? new Date(d.createdAt).toLocaleDateString() : '-'}</Td> {/* Updated column */}
+                <Td>{d.createdAt ? 'true' : 'false'}</Td> {/* New column content */}
                 <Td>
                   <Flex>
                     <Button
